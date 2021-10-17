@@ -2,8 +2,11 @@
 
 set -euo pipefail
 
+src_dir="${src_dir:-$(mktemp -d)}"
+install_dir="${install_dir:-$HOME/.local/opt/$name}"
+
 package-fetch() {
-  if ! [[ -d "${src_dir:=$(mktemp -d)}" ]]; then
+  if ! [[ -d "$src_dir" ]]; then
     mkdir -p "$src_dir"
   fi
   wget -O - "$url" | tar --${archive_format:-xz} -xf - -C "$src_dir" --strip-components=1
