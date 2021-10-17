@@ -3,7 +3,7 @@
 set -euo pipefail
 
 package-fetch() {
-  if ! [[ -d "$src_dir" ]]; then
+  if ! [[ -d "${src_dir:=$(mktemp -d)}" ]]; then
     mkdir -p "$src_dir"
   fi
   wget -O - "$url" | tar --${archive_format:-xz} -xf - -C "$src_dir" --strip-components=1
