@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+trap package-clean EXIT
+
+package-fetch
+
+pushd "$src_dir" 1>/dev/null
+
+package-configure
+package-build
+package-install
+
+popd 1>/dev/null

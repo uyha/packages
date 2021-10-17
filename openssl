@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+. ./make-steps
+
+url='https://www.openssl.org/source/openssl-1.1.1l.tar.gz'
+install_dir="$1"
+src_dir=$(mktemp -d)
+
+package-configure() {
+  ./config --prefix="$install_dir"
+}
+
+. ./invoke-build
+
