@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-. ./make-steps
-
+name=automake
 url="https://ftp.gnu.org/gnu/automake/automake-1.16.5.tar.xz"
-install_dir="$1"
 
+. ./make-steps
 . ./invoke-build

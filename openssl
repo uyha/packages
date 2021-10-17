@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-. ./make-steps
-
+name=openssl
 url='https://www.openssl.org/source/openssl-1.1.1l.tar.gz'
-install_dir="$1"
-src_dir=$(mktemp -d)
+archive_format=gz
+
+. ./make-steps
 
 package-configure() {
   ./config --prefix="$install_dir"

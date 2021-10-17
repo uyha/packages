@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-. ./make-steps
-
+name=autoconf
 url="https://ftp.gnu.org/gnu/autoconf/autoconf-latest.tar.xz"
-install_dir="$1"
 
+. ./make-steps
 . ./invoke-build
