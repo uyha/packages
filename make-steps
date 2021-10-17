@@ -3,16 +3,10 @@
 set -euo pipefail
 
 package-fetch() {
-  local temp_file=$(mktemp)
-
   if ! [[ -d "$src_dir" ]]; then
     mkdir -p "$src_dir"
   fi
-
-  wget -O "$temp_file" "$url" 1> /dev/null
-  tar -xf "$temp_file" -C "$src_dir" --strip-components=1 1>/dev/null
-
-  rm -f "$temp_file"
+  wget -O - "$url" | tar --${archive_format:-xz} -xf - -C "$src_dir" --strip-components=1
 }
 
 package-configure() {
