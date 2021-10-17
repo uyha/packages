@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-. ./make-steps
-
+name=m4
 url=https://ftp.gnu.org/gnu/m4/m4-latest.tar.xz
-install_dir="$1"
 
+. ./make-steps
 . ./invoke-build
