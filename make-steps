@@ -27,3 +27,4 @@ package-clean() {
   rm -rf "$src_dir"
 }
 
+trap package-clean EXIT
