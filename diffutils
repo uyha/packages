@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+name=diffutils
+url='https://ftp.gnu.org/gnu/diffutils/diffutils-3.8.tar.xz'
+
+. ./make-steps
+. ./invoke-build

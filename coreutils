@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+name=coreutils
+url='https://ftp.gnu.org/gnu/coreutils/coreutils-9.0.tar.xz'
+
+. ./make-steps
+. ./invoke-build
