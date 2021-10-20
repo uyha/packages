@@ -16,6 +16,10 @@ package-configure() {
   ./configure --prefix="$install_dir"
 }
 
+package-change-directory() {
+  pushd "$src_dir" 1>/dev/null
+}
+
 package-build() {
   make -j$(nproc)
 }
@@ -26,8 +30,20 @@ package-install() {
   make install -j$(nproc)
 }
 
+package-restore-directory() {
+  popd 1>/dev/null
+}
+
 package-clean() {
   rm -rf "$src_dir"
 }
 
-trap package-clean EXIT
+steps=(
+  fetch
+  change-directory
+  configure
+  build
+  install
+  restore-directory
+  clean
+)
