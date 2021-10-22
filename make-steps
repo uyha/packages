@@ -9,7 +9,7 @@ package-fetch() {
   if ! [[ -d "$src_dir" ]]; then
     mkdir -p "$src_dir"
   fi
-  wget -O - "$url" | tar --${archive_format:-xz} -xf - -C "$src_dir" --strip-components=1
+  curl -o - "$url" | tar --${archive_format:-xz} -xf - -C "$src_dir" --strip-components=1
 }
 
 package-configure() {
