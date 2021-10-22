@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+name=xz
+url='https://tukaani.org/xz/xz-5.2.5.tar.xz'
+
+. ./make-steps
+. ./invoke-build

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+name=lzip
+url='http://download.savannah.gnu.org/releases/lzip/lzip-1.22.tar.gz'
+archive_format=gz
+
+. ./make-steps
+. ./invoke-build
