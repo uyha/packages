@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+name=libxml2
+url='https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.12/libxml2-v2.9.12.tar.gz'
+archive_format=gz
+
+. ./make-steps
+
+package-configure() {
+  ACLOCAL_PATH="$LOCAL_OPT/pkg-config/share/aclocal:$LOCAL_OPT/libtool/share/aclocal" ./autogen.sh --prefix="$install_dir"
+}
+
+. ./invoke-build

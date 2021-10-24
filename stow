@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+name=stow
+url='https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz'
+archive_format=gz
+
+. ./make-steps
+. ./invoke-build

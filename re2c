@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+name=re2c
+url='https://github.com/skvadrik/re2c/releases/download/2.2/re2c-2.2.tar.xz'
+
+. ./make-steps
+. ./invoke-build
