@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+name=ncurses
+url='https://invisible-mirror.net/archives/ncurses/ncurses-6.3.tar.gz'
+archive_format=gz
+
+. ./make-steps
+
+package-configure() {
+  mkdir -p "$install_dir/lib/pkgconfig"
+  ./configure --prefix="$install_dir" --enable-pc-files --with-pkg-config-libdir="$install_dir/lib/pkgconfig"
+}
+
+. ./invoke-build
