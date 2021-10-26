@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+name=libffi
+url='https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz'
+archive_format=gz
+
+. ./make-steps
+. ./invoke-build
