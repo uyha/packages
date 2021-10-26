@@ -8,8 +8,9 @@ url='https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tar.xz'
 package-configure() {
   ./configure --prefix="$install_dir" \
 	  --enable-optimizations \
-	  CPPFLAGS="$(pkg-config --cflags zlib)" \
-	  LDFLAGS="$(pkg-config --libs zlib)"
+	  CPPFLAGS="$(pkg-config --cflags zlib libffi)" \
+	  LDFLAGS="$(pkg-config --libs-only-L zlib libffi)" \
+	  LIBS="$(pkg-config --libs-only-l zlib libffi)"
 }
 
 . ./invoke-build
