@@ -12,12 +12,12 @@ package-fetch() {
   curl -L -o - "$url" | tar --${archive_format:-xz} -xf - -C "$src_dir" --strip-components=1
 }
 
-package-configure() {
-  ./configure --prefix="$install_dir"
-}
-
 package-change-directory() {
   pushd "$src_dir" 1>/dev/null
+}
+
+package-configure() {
+  ./configure --prefix="$install_dir"
 }
 
 package-build() {
