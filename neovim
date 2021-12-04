@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+name=neovim
+url=https://github.com/neovim/neovim/archive/refs/heads/master.tar.gz
+archive_format=gz
+
+. ./make-steps
+
+package-configure() {
+  make cmake -j$(nproc) CMAKE_INSTALL_PREFIX="$install_dir" CMAKE_BUILD_TYPE=Release
+}
+
+. ./invoke-build
+
