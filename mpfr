@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+name=mpfr
+url='https://www.mpfr.org/mpfr-current/mpfr-4.1.0.tar.xz'
+archive_format=xz
+
+. ./make-steps
+
+package-configure() {
+  ./configure --prefix="$install_dir" --with-gmp="$(pkg-config --variable=prefix gmp)"
+}
+
+. ./invoke-build
