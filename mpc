@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+name=mpc
+url='https://ftp.gnu.org/gnu/mpc/mpc-1.2.1.tar.gz'
+archive_format=gz
+
+. ./make-steps
+
+package-configure() {
+  ./configure --prefix="$install_dir" \
+    --with-gmp="$(pkg-config --variable=prefix gmp)" \
+    --with-mpfr="$(pkg-config --variable=prefix mpfr)"
+}
+
+. ./invoke-build
