@@ -7,7 +7,7 @@ archive_format=gz
 . ./make-steps
 
 package-configure() {
-  make cmake -j$(nproc) CMAKE_INSTALL_PREFIX="$install_dir" CMAKE_BUILD_TYPE=Release
+  make -j$(nproc) CMAKE_INSTALL_PREFIX="$install_dir" CMAKE_BUILD_TYPE=Release
 }
 
 . ./invoke-build
