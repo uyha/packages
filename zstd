@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+name=zstd
+url='https://github.com/facebook/zstd/releases/download/v1.5.1/zstd-1.5.1.tar.gz'
+archive_format=gz
+
+. ./cmake-steps
+
+package-change-directory(){
+  pushd "$src_dir/build/cmake" 1>/dev/null
+}
+
+. ./invoke-build
