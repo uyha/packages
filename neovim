@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 name=neovim
-url=https://github.com/neovim/neovim/archive/refs/tags/v0.6.0.tar.gz
+url=https://github.com/neovim/neovim/archive/refs/tags/v0.6.1.tar.gz
 archive_format=gz
 
 . ./make-steps
 
 package-configure() {
-  make -j$(nproc) CMAKE_INSTALL_PREFIX="$install_dir" CMAKE_BUILD_TYPE=Release
+  make -j"$(nproc)" CMAKE_INSTALL_PREFIX="$install_dir" CMAKE_BUILD_TYPE=Release
 }
 
 . ./invoke-build
