@@ -7,11 +7,11 @@ url='https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tar.xz'
 
 package-configure() {
   ./configure --prefix="$install_dir" \
-	  --enable-optimizations \
-    --enable-loadable-sqlite-extensions \
-	  CPPFLAGS="$(pkg-config --cflags zlib)" \
-	  LDFLAGS="$(pkg-config --libs-only-L zlib)" \
-	  LIBS="$(pkg-config --libs-only-l zlib)"
+              --enable-optimizations \
+	      --enable-loadable-sqlite-extensions \
+	      CPPFLAGS="$(pkg-config --cflags zlib libffi sqlite3)" \
+	      LDFLAGS="$(pkg-config --libs-only-L zlib libffi sqlite3)" \
+	      LIBS="$(pkg-config --libs-only-l zlib libffi sqlite3)"
 }
 
 . ./invoke-build
