@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+name=luarocks
+url="https://luarocks.github.io/luarocks/releases/luarocks-3.9.0.tar.gz"
+archive_format=gz
+
+. ./make-steps
+. ./invoke-build
