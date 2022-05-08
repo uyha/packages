@@ -9,7 +9,8 @@ package-fetch() {
   if ! [[ -d "$src_dir" ]]; then
     mkdir -p "$src_dir"
   fi
-  curl -L -o - "$url" | tar --${archive_format:-xz} -xf - -C "$src_dir" --strip-components=1
+  # shellcheck disable=SC2154
+  curl -L -o - "$url" | tar --"${archive_format:-xz}" -xf - -C "$src_dir" --strip-components=1
 }
 
 package-change-directory() {
@@ -21,13 +22,13 @@ package-configure() {
 }
 
 package-build() {
-  make -j$(nproc)
+  make -j"$(nproc)"
 }
 
 package-install() {
   rm -rf "$install_dir"
 
-  make install -j$(nproc)
+  make install -j"$(nproc)"
 }
 
 package-restore-directory() {
@@ -38,6 +39,7 @@ package-clean() {
   rm -rf "$src_dir"
 }
 
+# shellcheck disable=SC2034
 steps=(
   fetch
   change-directory

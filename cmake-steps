@@ -2,14 +2,14 @@
 
 . ./make-steps
 
-package-configure(){
+package-configure() {
   cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$install_dir"
 }
 
 package-build() {
-  cmake --build build -- -j$(nproc)
+  cmake --build build -- -j"$(nproc)"
 }
 
-package-install(){
-  cmake --build build --target install -- -j$(nproc)
+package-install() {
+  cmake --build build --target install -- -j"$(nproc)"
 }
