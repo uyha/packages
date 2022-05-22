@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 name=python
-url='https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tar.xz'
+url='https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tar.xz'
 
 . ./make-steps
 
@@ -10,9 +10,9 @@ package-configure() {
     --prefix="$install_dir" \
     --enable-optimizations \
     --enable-loadable-sqlite-extensions \
-    CPPFLAGS="$(pkg-config --cflags zlib libffi sqlite3)" \
-    LDFLAGS="$(pkg-config --libs-only-L zlib libffi sqlite3)" \
-    LIBS="$(pkg-config --libs-only-l zlib libffi sqlite3)"
+    CPPFLAGS="$(pkg-config --cflags zlib libffi sqlite3 bzip2)" \
+    LDFLAGS="$(pkg-config --libs-only-L zlib libffi sqlite3 bzip2)" \
+    LIBS="$(pkg-config --libs-only-l zlib libffi sqlite3 bzip2)"
 }
 
 . ./invoke-build
