@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+url="https://github.com/mvdan/sh/releases/download/v3.5.0/shfmt_v3.5.0_linux_amd64"
+
+curl --silent --output /usr/local/bin/shfmt --location "$url"
+chmod +x /usr/local/bin/shfmt

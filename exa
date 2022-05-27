@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+url="https://github.com/ogham/exa/releases/download/v0.10.1/exa-linux-x86_64-v0.10.1.zip"
+
+stow --delete --dir=/opt --target=/usr/local exa
+rm -rf /opt/exa
+(
+  set -euo pipefail
+
+  mkdir -p /opt/exa
+  tmp=$(mktemp)
+  curl --silent --location --output "$tmp" "$url"
+  unzip -q -q "$tmp" -d /opt/exa
+  mkdir -p /opt/exa/share/man/man{1,5}
+  mv /opt/exa/man/exa.1 /opt/exa/share/man/man1
+  mv /opt/exa/man/exa_colors.5 /opt/exa/share/man/man5
+  rm -rf /opt/exa/man
+)
+stow --dir=/opt --target=/usr/local exa

@@ -4,6 +4,11 @@ set -euo pipefail
 
 src_dir="${src_dir:-$(mktemp -d)}"
 install_dir="${install_dir:-/opt/$name}"
+dep=("${dep[@]}")
+
+package-install-dependencies() {
+  apt install -y "${dep[@]}"
+}
 
 package-fetch() {
   if ! [[ -d "$src_dir" ]]; then
@@ -26,6 +31,9 @@ package-build() {
 }
 
 package-clean-links() {
+  if [[ ! -d "$install_dir" ]]; then
+    return
+  fi
   stow --delete --dir="$install_dir" --target=/usr/local .
   rm -rf "$install_dir"
 }
@@ -48,6 +56,7 @@ package-clean() {
 
 # shellcheck disable=SC2034
 steps=(
+  install-dependencies
   fetch
   change-directory
   configure

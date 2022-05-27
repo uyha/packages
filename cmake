@@ -9,8 +9,7 @@ archive_format=gz
 package-configure() {
   ./bootstrap \
     --prefix="$install_dir" \
-    --parallel="$(nproc)" \
-    -- -DOPENSSL_ROOT_DIR="$LOCAL_OPT/openssl"
+    --parallel="$(nproc)"
 }
 
 . ./invoke-build
