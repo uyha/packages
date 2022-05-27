@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+url="https://github.com/junegunn/fzf/releases/download/0.30.0/fzf-0.30.0-linux_amd64.tar.gz"
+extra_url="https://github.com/junegunn/fzf/archive/refs/tags/0.30.0.tar.gz"
+extra_files=(
+  '*/bin/fzf-tmux'
+  '*/man/man1/fzf-tmux.1'
+  '*/man/man1/fzf.1'
+  '*/shell/completion.bash'
+  '*/shell/key-bindings.bash'
+)
+
+if [[ -d /opt/fzf ]]; then
+  stow --delete --dir=/opt --target=/usr/local fzf
+  rm -rf /opt/fzf
+fi
+
+mkdir -p /opt/fzf/bin
+curl -L "$url" | tar -C /opt/fzf/bin -xzf -
+
+curl -L "$extra_url" | tar -C /opt/fzf/ -xzf - --strip-components=1 --wildcards "${extra_files[@]}"
+mkdir -p /opt/fzf/share
+mv /opt/fzf/man /opt/fzf/share/man
+mkdir -p /opt/fzf/{key-bindings,completions}
+mv /opt/fzf/shell/completion.bash /opt/fzf/completions/fzf.bash
+mv /opt/fzf/shell/key-bindings.bash /opt/fzf/key-bindings/fzf.bash
+rm -rf /opt/fzf/shell
+
+stow --dir=/opt --target=/usr/local fzf
