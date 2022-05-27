@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-name=sqlite
-url=https://sqlite.org/2022/sqlite-autoconf-3380000.tar.gz
-archive_format=gz
-
-. ./make-steps
-. ./invoke-build

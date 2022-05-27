@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-name=gettext
-url=https://ftp.gnu.org/pub/gnu/gettext/gettext-0.21.tar.xz
-
-. ./make-steps
-. ./invoke-build

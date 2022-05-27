@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-name=patch
-url='https://ftp.gnu.org/gnu/patch/patch-2.7.6.tar.xz'
-
-. ./make-steps
-. ./invoke-build

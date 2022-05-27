@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-name=libtool
-url='https://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz'
-archive_format=gz
-
-. ./make-steps
-. ./invoke-build

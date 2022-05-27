@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-name=zlib
-url='https://zlib.net/zlib-1.2.12.tar.xz'
-
-. ./make-steps
-. ./invoke-build
