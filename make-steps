@@ -3,7 +3,7 @@
 set -euo pipefail
 
 src_dir="${src_dir:-$(mktemp -d)}"
-install_dir="${install_dir:-$HOME/.local/opt/$name}"
+install_dir="${install_dir:-/opt/$name}"
 
 package-fetch() {
   if ! [[ -d "$src_dir" ]]; then
@@ -25,10 +25,17 @@ package-build() {
   make -j"$(nproc)"
 }
 
-package-install() {
+package-clean-links() {
+  stow --delete --dir="$install_dir" --target=/usr/local .
   rm -rf "$install_dir"
+}
 
+package-install() {
   make install -j"$(nproc)"
+}
+
+package-install-links() {
+  stow --dir="$install_dir" --target=/usr/local .
 }
 
 package-restore-directory() {
@@ -45,7 +52,9 @@ steps=(
   change-directory
   configure
   build
+  clean-links
   install
+  install-links
   restore-directory
   clean
 )

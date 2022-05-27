@@ -18,8 +18,6 @@ package-build() {
 }
 
 package-install() {
-  rm -rf "$install_dir"
-
   make install -j"$(nproc)" PREFIX="$install_dir"
   cp -P libbz2.so* "$install_dir"/lib
   ln -sn libbz2.so.1.0 "$install_dir"/lib/libbz2.so
