@@ -1,0 +1,65 @@
+# shellcheck shell=bash
+
+set -euo pipefail
+
+declare name url type
+declare -a extract remove
+# shellcheck disable=SC2034
+declare -a bin completions bindings
+# shellcheck disable=SC2034
+declare -a man1 man2 man3 man4 man5 man6 man7 man8
+
+root_dirs=(bin completions key_bindings)
+man_dirs=(man{1..8})
+
+strip="${strip:-1}"
+root="${root:-/tmp}"
+install_dir="${install_dir:-$root/$name}"
+runtime_dir="${runtime_dir:-/usr/local}"
+
+if [[ -d "$install_dir" ]]; then
+  stow --delete --dir=/opt --target=/usr/local "$name"
+  rm -rf "$install_dir"
+fi
+
+mkdir -p "$install_dir"
+curl --silent --location "$url" |
+  tar -C "$install_dir" \
+    --extract \
+    --"$type" \
+    --file - \
+    --strip-components="$strip" \
+    --wildcards "${extract[@]}"
+
+(
+  cd "$install_dir"
+
+  for dir in "${root_dirs[@]}"; do
+    if [[ -z ${!dir+x} ]]; then
+      continue
+    fi
+
+    declare -n ref="$dir"
+    if [[ ${#ref[@]} -gt 0 ]]; then
+      mkdir -p "$install_dir/$dir"
+      mv "${ref[@]}" "$install_dir/$dir"
+    fi
+  done
+
+  for dir in "${man_dirs[@]}"; do
+    if [[ -z ${!dir+x} ]]; then
+      continue
+    fi
+
+    declare -n ref="$dir"
+    if [[ ${#ref[@]} -gt 0 ]]; then
+      mkdir -p "$install_dir/share/man/$dir"
+      mv "${ref[@]}" "$install_dir/share/man/$dir"
+    fi
+  done
+
+  cd "$install_dir"
+  rm -rf "${remove[@]}"
+)
+
+# stow --dir="$root" --target=/usr/local "$name"
