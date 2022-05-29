@@ -4,6 +4,7 @@ set -euo pipefail
 # shellcheck disable=SC2034
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
+# Dasel value extractors
 value() {
   if [[ "$#" -lt 2 ]]; then
     echo >&2 "Expecting 2 arguments: config path, and selector"
@@ -32,14 +33,58 @@ length() {
   fi
   dasel --length --file "$1" --selector "$2"
 }
-check-type() {
+
+# Dasel checkings
+check-existing() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+  dasel --file "$1" --selector "$2" &>/dev/null
+}
+
+# Dasel requirements
+require-type() {
   if [[ "$#" -lt 3 ]]; then
     echo >&2 "Expecting 3 arguments: config path, selector, and expected type"
     exit 1
   fi
-  type=$(dasel --file "$1" --selector "$2.[@]")
-  if [[ "$type" != "$3" ]]; then
-    echo -e "${blue}$2${reset} is expected to be ${blue}$3${reset}, but ${blue}$type${reset} is given" >&2
+  require-existing "$1" "$2"
+
+  declare actual_type expected_type
+
+  expected_type="$3"
+  actual_type="$(dasel --file "$1" --selector "$2.[@]")"
+
+  if [[ "$actual_type" != "$expected_type" ]]; then
+    echo -e "${blue}$2${reset} is expected to be ${blue}$expected_type${reset}, but ${blue}$actual_type${reset} is given" >&2
+    exit 1
+  fi
+}
+require-array-type-all() {
+  if [[ "$#" -lt 3 ]]; then
+    echo >&2 "Expecting 3 arguments: config path, selector, and expected type"
+    exit 1
+  fi
+
+  declare config="$1"
+  declare selector="$2"
+  declare type="$3"
+  declare i
+
+  require-type "$config" "$selector" array
+  number_elements="$(length "$config" "$selector")"
+  for ((i = 0; i < "$number_elements"; ++i)); do
+    require-type "$config" "$selector.[$i]" "$type"
+  done
+}
+require-existing() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+  if ! check-existing "$1" "$2"; then
+    echo >&2 "$2 is required"
     exit 1
   fi
 }
@@ -58,28 +103,36 @@ populate() (
 
   for ((i = 0; i < "$number_packages"; ++i)); do
     # Sanity check
-    check-type "$config" "package.[$i].url" string
-    check-type "$config" "package.[$i].type" string
-    check-type "$config" "package.[$i].structure" map
+    require-type "$config" "package.[$i].url" string
+    require-type "$config" "package.[$i].type" string
+    require-type "$config" "package.[$i].structure" map
     while IFS= read -r key; do
-      check-type "$config" "package.[$i].structure.$key" array
-      number_elements="$(length "$config" "package.[$i].structure.$key")"
-      for ((j = 0; j < "$number_elements"; ++j)); do
-        check-type "$config" "package.[$i].structure.$key.[$j]" string
-      done
+      require-array-type-all "$config" "package.[$i].structure.$key" string
     done < <(keys "$config" "package.[$i].structure")
 
-    url="$(value "$config" "package.[$i].url" url)"
-    type="$(value "$config" "package.[$i].type" type)"
+    url="$(value "$config" "package.[$i].url")"
+    type="$(value "$config" "package.[$i].type")"
 
     # Download and extract
+    echo -e "Downloading and extracting ${blue}$name${reset}"
     if [[ "$type" == gzip ]]; then
-      check-type "$config" "package.[$i].output" string
+      require-type "$config" "package.[$i].output" string
 
-      output="$(value "$config" "package.[$i].output" output)"
-
-      echo -e "Downloading and extracting ${blue}$name${reset}"
+      output="$(value "$config" "package.[$i].output")"
       curl --silent --location "$url" | gzip -d >"$output"
+    elif [[ "$type" == zip ]]; then
+      curl --silent --location --output tmp "$url"
+
+      if check-existing "$config" "package.[$i].output"; then
+        require-array-type-all "$config" "package.[$i].output" string
+        readarray -t output < <(values "$config" "package.[$i].output")
+
+        unzip -q -q tmp "${output[@]}"
+      else
+        unzip -q -q tmp
+      fi
+
+      rm tmp
     else
       echo -e "${blue}$type${reset} is not supported"
       exit 1
@@ -87,7 +140,6 @@ populate() (
 
     # Move to destinated locations
     echo -e "Arranging files"
-
     while IFS= read -r dir; do
       mkdir -p "$dir"
       while IFS= read -r file; do
@@ -97,6 +149,13 @@ populate() (
 
     if [[ -d bin ]]; then
       chmod +x bin/*
+    fi
+
+    # Remove files
+    if check-existing "$config" "package.[$i].remove"; then
+      echo -e "Removing files"
+      readarray -t remove < <(values "$config" "package.[$i].remove")
+      rm -rf "${remove[@]}"
     fi
   done
 )

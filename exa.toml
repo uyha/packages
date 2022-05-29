@@ -1,0 +1,14 @@
+[[package]]
+url="https://github.com/ogham/exa/releases/download/v0.10.1/exa-linux-x86_64-v0.10.1.zip"
+type="zip"
+output=[
+  "bin/exa",
+  "completions/exa.bash",
+  "man/exa.1",
+  "man/exa_colors.5"
+]
+remove=["man"]
+
+[package.structure]
+"share/man/man1" = ["man/exa.1"]
+"share/man/man5" = ["man/exa_colors.5"]
