@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+# shellcheck disable=SC2034
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+value() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+  dasel --file "$1" --selector "$2"
+}
+keys() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+  dasel --multiple --file "$1" --selector "$2.-"
+}
+values() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+  dasel --multiple --file "$1" --selector "$2.[*]"
+}
+length() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+  dasel --length --file "$1" --selector "$2"
+}
+check-type() {
+  if [[ "$#" -lt 3 ]]; then
+    echo >&2 "Expecting 3 arguments: config path, selector, and expected type"
+    exit 1
+  fi
+  type=$(dasel --file "$1" --selector "$2.[@]")
+  if [[ "$type" != "$3" ]]; then
+    echo -e "${blue}$2${reset} is expected to be ${blue}$3${reset}, but ${blue}$type${reset} is given" >&2
+    exit 1
+  fi
+}
+populate() (
+  if [[ "$#" -lt 2 ]]; then
+    echo -e "Expecting 2 arguments: config path, and work directory"
+    exit 1
+  fi
+
+  declare config="$1"
+  declare dir="$2"
+
+  cd "$dir"
+
+  number_packages=$(length "$config" 'package')
+
+  for ((i = 0; i < "$number_packages"; ++i)); do
+    # Sanity check
+    check-type "$config" "package.[$i].url" string
+    check-type "$config" "package.[$i].type" string
+    check-type "$config" "package.[$i].structure" map
+    while IFS= read -r key; do
+      check-type "$config" "package.[$i].structure.$key" array
+      number_elements="$(length "$config" "package.[$i].structure.$key")"
+      for ((j = 0; j < "$number_elements"; ++j)); do
+        check-type "$config" "package.[$i].structure.$key.[$j]" string
+      done
+    done < <(keys "$config" "package.[$i].structure")
+
+    url="$(value "$config" "package.[$i].url" url)"
+    type="$(value "$config" "package.[$i].type" type)"
+
+    # Download and extract
+    if [[ "$type" == gzip ]]; then
+      check-type "$config" "package.[$i].output" string
+
+      output="$(value "$config" "package.[$i].output" output)"
+
+      echo -e "Downloading and extracting ${blue}$name${reset}"
+      curl --silent --location "$url" | gzip -d >"$output"
+    else
+      echo -e "${blue}$type${reset} is not supported"
+      exit 1
+    fi
+
+    # Move to destinated locations
+    echo -e "Arranging files"
+
+    while IFS= read -r dir; do
+      mkdir -p "$dir"
+      while IFS= read -r file; do
+        mv "$file" "$dir"
+      done < <(values "$config" "package.[$i].structure.$dir")
+    done < <(keys "$config" "package.[$i].structure")
+
+    if [[ -d bin ]]; then
+      chmod +x bin/*
+    fi
+  done
+)
+check-file-readable() {
+  if [[ "$#" -lt 1 ]]; then
+    echo -e "Expecting 1 arguments: file path"
+    exit 1
+  fi
+
+  declare file="$1"
+  if [[ ! -e "$file" ]]; then
+    echo -e "${blue}$file${reset} does not exist" >&2
+    exit 1
+  elif [[ ! -f "$file" ]]; then
+    echo -e "${blue}$file${reset} is not a file" >&2
+    exit 1
+  elif [[ ! -r "$file" ]]; then
+    echo -e "${blue}$file${reset} is unreadable" >&2
+    exit 1
+  fi
+}
+finalize() {
+  if [[ "$#" -lt 2 ]]; then
+    echo -e "Expecting 1 arguments: working, and install directory"
+    exit 1
+  fi
+
+  declare tmp="$1"
+  declare dir="$2"
+
+  if [[ -d "$dir" ]]; then
+    stow --delete --dir="$dir" --target="$TARGET" "."
+    rm -rf "$dir"
+  fi
+
+  mv "$tmp" "$dir"
+  chmod +rx "$dir"
+  stow --dir="$dir" --target="$TARGET" "."
+}
+
+blue="\e[34m"
+reset="\e[0m"
+
+if [[ "$#" -lt 1 ]]; then
+  echo >&2 "Expecting the name of package"
+  exit 1
+fi
+
+PREFIX="${PREFIX:-/opt}"
+TARGET="${TARGET:-/usr/local}"
+
+name="$1"
+config="$SCRIPT_DIR/$name.toml"
+install="$PREFIX/$name"
+tmp="$(mktemp -d)"
+
+check-file-readable "$config"
+populate "$config" "$tmp"
+finalize "$tmp" "$install"

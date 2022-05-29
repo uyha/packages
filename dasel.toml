@@ -1,0 +1,7 @@
+[[package]]
+url="https://github.com/TomWright/dasel/releases/download/v1.24.3/dasel_linux_amd64.gz"
+type="gzip"
+output="dasel"
+
+[package.structure]
+bin=["dasel"]
