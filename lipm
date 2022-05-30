@@ -51,9 +51,9 @@ require-type() {
   fi
   require-existing "$1" "$2"
 
-  declare actual_type expected_type
+  declare actual_type
+  declare expected_type="$3"
 
-  expected_type="$3"
   actual_type="$(dasel --file "$1" --selector "$2.[@]")"
 
   if [[ "$actual_type" != "$expected_type" ]]; then
@@ -70,7 +70,7 @@ require-array-type-all() {
   declare config="$1"
   declare selector="$2"
   declare type="$3"
-  declare i
+  declare i number_elements
 
   require-type "$config" "$selector" array
   number_elements="$(length "$config" "$selector")"
@@ -88,6 +88,102 @@ require-existing() {
     exit 1
   fi
 }
+
+config-check() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+
+  declare config="$1"
+  declare selector="$2"
+
+  require-type "$config" "$selector.url" string
+  require-type "$config" "$selector.type" string
+  require-type "$config" "$selector.structure" map
+  while IFS= read -r key; do
+    require-array-type-all "$config" "$selector.structure.$key" string
+  done < <(keys "$config" "$selector.structure")
+}
+
+downtract-gzip() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+
+  declare config="$1"
+  declare selector="$2"
+
+  declare output url
+
+  require-type "$config" "$selector.output" string
+
+  url="$(value "$config" "$selector.url")"
+  output="$(value "$config" "$selector.output")"
+
+  curl --silent --location "$url" | gzip -d >"$output"
+}
+downtract-tarball() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+
+  declare config="$1"
+  declare selector="$2"
+  declare type="$3"
+
+  declare output url
+  declare strip=0
+
+  require-array-type-all "$config" "$selector.output" string
+
+  if check-existing "$config" "$selector.strip-components"; then
+    require-type "$config" "$selector.strip-components" int
+    strip="$(value "$config" "$selector.strip-components" | trim)"
+  fi
+
+  url="$(value "$config" "$selector.url")"
+  readarray -t output < <(values "$config" "$selector.output")
+
+  curl --silent --location "$url" |
+    tar \
+      --extract \
+      --strip-components="$strip" \
+      --"$type" \
+      --file - \
+      --wildcards "${output[@]}"
+}
+downtract-zip() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+
+  declare config="$1"
+  declare selector="$2"
+
+  declare output url
+
+  url="$(value "$config" "$selector.url")"
+
+  curl --silent --location --output tmp "$url"
+
+  if check-existing "$config" "$selector.output"; then
+    require-array-type-all "$config" "$selector.output" string
+    readarray -t output < <(values "$config" "$selector.output")
+
+    unzip -q -q tmp "${output[@]}"
+  else
+    unzip -q -q tmp
+  fi
+
+  rm tmp
+}
+trim() {
+  perl -pe "s/^\s*(.*)\s*$/\1/"
+}
 populate() (
   if [[ "$#" -lt 2 ]]; then
     echo -e "Expecting 2 arguments: config path, and work directory"
@@ -103,37 +199,32 @@ populate() (
 
   for ((i = 0; i < "$number_packages"; ++i)); do
     # Sanity check
-    require-type "$config" "package.[$i].url" string
-    require-type "$config" "package.[$i].type" string
-    require-type "$config" "package.[$i].structure" map
-    while IFS= read -r key; do
-      require-array-type-all "$config" "package.[$i].structure.$key" string
-    done < <(keys "$config" "package.[$i].structure")
-
-    url="$(value "$config" "package.[$i].url")"
-    type="$(value "$config" "package.[$i].type")"
+    config-check "$config" "package.[$i]"
+    type="$(value "$config" "package.[$i].type" | trim)"
 
     # Download and extract
     echo -e "Downloading and extracting ${blue}$name${reset}"
     if [[ "$type" == gzip ]]; then
-      require-type "$config" "package.[$i].output" string
-
-      output="$(value "$config" "package.[$i].output")"
-      curl --silent --location "$url" | gzip -d >"$output"
+      downtract-gzip "$config" "package.[$i]"
     elif [[ "$type" == zip ]]; then
-      curl --silent --location --output tmp "$url"
-
-      if check-existing "$config" "package.[$i].output"; then
-        require-array-type-all "$config" "package.[$i].output" string
-        readarray -t output < <(values "$config" "package.[$i].output")
-
-        unzip -q -q tmp "${output[@]}"
-      else
-        unzip -q -q tmp
-      fi
-
-      rm tmp
+      downtract-zip "$config" "package.[$i]"
+    elif [[ "$type" =~ ^tar.* ]]; then
+      declare comp_type
+      case "${type#tar.}" in
+      bz) comp_type=bzip2 ;;
+      xz) comp_type=xz ;;
+      lz) comp_type=lzip ;;
+      gz) comp_type=gzip ;;
+      lzma) comp_type=lzma ;;
+      lzop) comp_type=lzop ;;
+      *)
+        echo "${blue}$type${rest} is not supported"
+        exit 1
+        ;;
+      esac
+      downtract-tarball "$config" "package.[$i]" "$comp_type"
     else
+
       echo -e "${blue}$type${reset} is not supported"
       exit 1
     fi
