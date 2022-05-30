@@ -258,6 +258,7 @@ populate() (
     type="$(value "$config" "package.[$i].type" | trim)"
 
     # Download and extract
+    # shellcheck disable=SC2059
     printf "${clear}Downloading and extracting ${blue}$name${reset}"
     if [[ "$type" == gzip ]]; then
       downtract-gzip "$config" "package.[$i]"
@@ -287,6 +288,7 @@ populate() (
 
     # Move to destinated locations
     if check-existing "$config" "package.[$i].structure"; then
+      # shellcheck disable=SC2059
       printf "${clear}Arranging files"
       while IFS= read -r dir; do
         mkdir -p "$dir"
@@ -302,6 +304,7 @@ populate() (
 
     # Rename files
     if check-existing "$config" "package.[$i].rename"; then
+      # shellcheck disable=SC2059
       printf "${clear}Renaming files"
       while IFS= read -r source; do
         declare target
@@ -312,6 +315,7 @@ populate() (
 
     # Remove files
     if check-existing "$config" "package.[$i].remove"; then
+      # shellcheck disable=SC2059
       printf "${clear}Removing files"
       readarray -t remove < <(values "$config" "package.[$i].remove")
       rm -rf "${remove[@]}"
@@ -375,4 +379,5 @@ check-file-readable "$config"
 populate "$config" "$tmp"
 finalize "$tmp" "$name"
 
-printf "${clear}Finished installing ${blue}%s${reset}\n" "$name"
+# shellcheck disable=SC2059
+printf "${clear}Finished installing ${blue}$name${reset}\n"
