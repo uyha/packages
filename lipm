@@ -244,6 +244,16 @@ populate() (
       chmod +x bin/*
     fi
 
+    # Rename files
+    if check-existing "$config" "package.[$i].rename"; then
+      echo -e "Renaming files"
+      while IFS= read -r source; do
+        declare target
+        target=$(value "$config" "package.[$i].rename.${source//./\\.}")
+        mv "$source" "$target"
+      done < <(keys "$config" "package.[$i].rename")
+    fi
+
     # Remove files
     if check-existing "$config" "package.[$i].remove"; then
       echo -e "Removing files"

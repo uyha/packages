@@ -16,7 +16,7 @@ remove = [
 bin = [
   "rg"
 ]
-completions = [
+"share/bash-completion/completions" = [
   "complete/rg.bash"
 ]
 "share/man/man1" = [
