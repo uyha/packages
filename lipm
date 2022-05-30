@@ -237,7 +237,7 @@ populate() (
       mkdir -p "$dir"
       while IFS= read -r file; do
         mv "$file" "$dir"
-      done < <(values "$config" "package.[$i].structure.$dir")
+      done < <(values "$config" "package.[$i].structure.${dir//./\\.}")
     done < <(keys "$config" "package.[$i].structure")
 
     if [[ -d bin ]]; then
