@@ -134,10 +134,9 @@ downtract-tarball() {
   declare selector="$2"
   declare type="$3"
 
-  declare output url
+  declare -a output=()
+  declare url
   declare strip=0
-
-  require-array-type-all "$config" "$selector.output" string
 
   if check-existing "$config" "$selector.strip-components"; then
     require-type "$config" "$selector.strip-components" int
@@ -145,7 +144,10 @@ downtract-tarball() {
   fi
 
   url="$(value "$config" "$selector.url")"
-  readarray -t output < <(values "$config" "$selector.output")
+  if check-existing "$config" "$selector.output"; then
+    require-array-type-all "$config" "$selector.output" string
+    readarray -t output < <(values "$config" "$selector.output")
+  fi
 
   curl --silent --location "$url" |
     tar \
@@ -270,21 +272,21 @@ check-file-readable() {
 }
 finalize() {
   if [[ "$#" -lt 2 ]]; then
-    echo -e "Expecting 1 arguments: working, and install directory"
+    echo -e "Expecting 2 arguments: working directory, and name"
     exit 1
   fi
 
   declare tmp="$1"
-  declare dir="$2"
+  declare name="$2"
 
-  if [[ -d "$dir" ]]; then
-    stow --delete --dir="$dir" --target="$TARGET" "."
-    rm -rf "$dir"
+  if [[ -d "$PREFIX/$name" ]]; then
+    stow --delete --dir="$PREFIX" --target="$TARGET" "$name"
+    rm -rf "${PREFIX:?}/$name"
   fi
 
-  mv "$tmp" "$dir"
-  chmod +rx "$dir"
-  stow --dir="$dir" --target="$TARGET" "."
+  mv "$tmp" "$PREFIX/$name"
+  chmod +rx "$PREFIX/$name"
+  stow --dir="$PREFIX" --target="$TARGET" "$name"
 }
 
 blue="\e[34m"
@@ -300,9 +302,8 @@ TARGET="${TARGET:-/usr/local}"
 
 name="$1"
 config="$SCRIPT_DIR/$name.toml"
-install="$PREFIX/$name"
 tmp="$(mktemp -d)"
 
 check-file-readable "$config"
 populate "$config" "$tmp"
-finalize "$tmp" "$install"
+finalize "$tmp" "$name"
