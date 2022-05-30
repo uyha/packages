@@ -100,10 +100,40 @@ config-check() {
 
   require-type "$config" "$selector.url" string
   require-type "$config" "$selector.type" string
-  require-type "$config" "$selector.structure" map
-  while IFS= read -r key; do
-    require-array-type-all "$config" "$selector.structure.$key" string
-  done < <(keys "$config" "$selector.structure")
+
+  declare type
+
+  type="$(value "$config" "$selector.type" | trim)"
+
+  if check-existing "$config" "$selector.strip-components"; then
+    require-type "$config" "$selector.strip-components" int
+  fi
+
+  if check-existing "$config" "$selector.output"; then
+    if [[ "$type" == zip || "$type" == plain ]]; then
+      require-type "$config" "$selector.output" string
+    else
+      require-array-type-all "$config" "$selector.output" string
+    fi
+  fi
+
+  if check-existing "$config" "$selector.structure"; then
+    require-type "$config" "$selector.structure" map
+    while IFS= read -r key; do
+      require-array-type-all "$config" "$selector.structure.$key" string
+    done < <(keys "$config" "$selector.structure")
+  fi
+
+  if check-existing "$config" "$selector.rename"; then
+    require-type "$config" "$selector.rename" map
+    while IFS= read -r key; do
+      require-type "$config" "$selector.rename.${key//./\\.}" string
+    done < <(keys "$config" "$selector.rename")
+  fi
+
+  if check-existing "$config" "$selector.remove"; then
+    require-array-type-all "$config" "$selector.remove" string
+  fi
 }
 
 downtract-gzip() {
@@ -170,18 +200,41 @@ downtract-zip() {
 
   url="$(value "$config" "$selector.url")"
 
-  curl --silent --location --output tmp "$url"
-
   if check-existing "$config" "$selector.output"; then
     require-array-type-all "$config" "$selector.output" string
     readarray -t output < <(values "$config" "$selector.output")
 
+    curl --silent --location --output tmp "$url"
     unzip -q -q tmp "${output[@]}"
   else
+    curl --silent --location --output tmp "$url"
     unzip -q -q tmp
   fi
 
   rm tmp
+}
+downtract-plain() {
+  if [[ "$#" -lt 2 ]]; then
+    echo >&2 "Expecting 2 arguments: config path, and selector"
+    exit 1
+  fi
+
+  declare config="$1"
+  declare selector="$2"
+
+  declare output url
+
+  url="$(value "$config" "$selector.url")"
+
+  if check-existing "$config" "$selector.output"; then
+    require-type "$config" "$selector.output" string
+
+    output="$(value "$config" "$selector.output")"
+
+    curl --silent --location --output "$output" "$url"
+  else
+    curl --silent --location --remote-header-name --remote-name "$url"
+  fi
 }
 trim() {
   perl -pe "s/^\s*(.*)\s*$/\1/"
@@ -205,7 +258,7 @@ populate() (
     type="$(value "$config" "package.[$i].type" | trim)"
 
     # Download and extract
-    echo -e "Downloading and extracting ${blue}$name${reset}"
+    printf "${clear}Downloading and extracting ${blue}$name${reset}"
     if [[ "$type" == gzip ]]; then
       downtract-gzip "$config" "package.[$i]"
     elif [[ "$type" == zip ]]; then
@@ -225,20 +278,23 @@ populate() (
         ;;
       esac
       downtract-tarball "$config" "package.[$i]" "$comp_type"
+    elif [[ "$type" == plain ]]; then
+      downtract-plain "$config" "package.[$i]"
     else
-
       echo -e "${blue}$type${reset} is not supported"
       exit 1
     fi
 
     # Move to destinated locations
-    echo -e "Arranging files"
-    while IFS= read -r dir; do
-      mkdir -p "$dir"
-      while IFS= read -r file; do
-        mv "$file" "$dir"
-      done < <(values "$config" "package.[$i].structure.${dir//./\\.}")
-    done < <(keys "$config" "package.[$i].structure")
+    if check-existing "$config" "package.[$i].structure"; then
+      printf "${clear}Arranging files"
+      while IFS= read -r dir; do
+        mkdir -p "$dir"
+        while IFS= read -r file; do
+          mv "$file" "$dir"
+        done < <(values "$config" "package.[$i].structure.${dir//./\\.}")
+      done < <(keys "$config" "package.[$i].structure")
+    fi
 
     if [[ -d bin ]]; then
       chmod +x bin/*
@@ -246,7 +302,7 @@ populate() (
 
     # Rename files
     if check-existing "$config" "package.[$i].rename"; then
-      echo -e "Renaming files"
+      printf "${clear}Renaming files"
       while IFS= read -r source; do
         declare target
         target=$(value "$config" "package.[$i].rename.${source//./\\.}")
@@ -256,7 +312,7 @@ populate() (
 
     # Remove files
     if check-existing "$config" "package.[$i].remove"; then
-      echo -e "Removing files"
+      printf "${clear}Removing files"
       readarray -t remove < <(values "$config" "package.[$i].remove")
       rm -rf "${remove[@]}"
     fi
@@ -301,6 +357,7 @@ finalize() {
 
 blue="\e[34m"
 reset="\e[0m"
+clear="\033[0K\r"
 
 if [[ "$#" -lt 1 ]]; then
   echo >&2 "Expecting the name of package"
@@ -317,3 +374,5 @@ tmp="$(mktemp -d)"
 check-file-readable "$config"
 populate "$config" "$tmp"
 finalize "$tmp" "$name"
+
+printf "${clear}Finished installing ${blue}%s${reset}\n" "$name"

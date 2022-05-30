@@ -1,0 +1,4 @@
+[[package]]
+url = "https://github.com/neovim/neovim/releases/download/v0.7.0/nvim-linux64.tar.gz"
+type = "tar.gz"
+strip-components = 1
