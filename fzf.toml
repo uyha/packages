@@ -17,16 +17,14 @@ output = [
   '*/shell/key-bindings.bash'
 ]
 
-structure = {
-  "share/man" = ["man"],
-  "share/bash-completion/completions" = [ "shell/completion.bash" ],
-  "share/bash-binding/bindings" = [ "shell/key-bindings.bash" ]
-}
+[package.structure]
+"share/man" = ["man"]
+"share/bash-completion/completions" = [ "shell/completion.bash" ]
+"share/bash-binding/bindings" = [ "shell/key-bindings.bash" ]
 
-rename = {
-  "share/bash-completion/completions/completion.bash" = "share/bash-completion/completions/fzf.bash",
-  "share/bash-binding/bindings/key-bindings.bash" = "share/bash-binding/bindings/fzf.bash"
-}
+[package.rename]
+"share/bash-completion/completions/completion.bash" = "share/bash-completion/completions/fzf.bash"
+"share/bash-binding/bindings/key-bindings.bash" = "share/bash-binding/bindings/fzf.bash"
 
 remove = [ "shell", "man" ]
 

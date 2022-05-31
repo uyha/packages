@@ -13,12 +13,6 @@ remove = [
 ]
 
 [package.structure]
-bin = [
-  "fd"
-]
-"share/man/man1" = [
-  "fd.1"
-]
-"share/bash-completion/completions" = [
-  "autocomplete/fd.bash"
-]
+bin = [ "fd" ]
+"share/man/man1" = [ "fd.1" ]
+"share/bash-completion/completions" = [ "autocomplete/fd.bash" ]

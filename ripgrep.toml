@@ -13,13 +13,7 @@ remove = [
 ]
 
 [package.structure]
-bin = [
-  "rg"
-]
-"share/bash-completion/completions" = [
-  "complete/rg.bash"
-]
-"share/man/man1" = [
-  "doc/rg.1"
-]
+bin = [ "rg" ]
+"share/bash-completion/completions" = [ "complete/rg.bash" ]
+"share/man/man1" = [ "doc/rg.1" ]
 

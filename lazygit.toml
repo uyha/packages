@@ -2,4 +2,6 @@
 url = "https://github.com/jesseduffield/lazygit/releases/download/v0.34/lazygit_0.34_Linux_x86_64.tar.gz"
 type = "tar.gz"
 output = [ "lazygit" ]
-structure = { bin = [ "lazygit" ] }
+
+[package.structure]
+bin = [ "lazygit" ]

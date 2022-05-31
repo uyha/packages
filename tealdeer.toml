@@ -2,6 +2,6 @@
 url = "https://github.com/dbrgn/tealdeer/releases/download/v1.5.0/tealdeer-linux-x86_64-musl"
 type = "plain"
 output = "tldr"
-structure = {
-  bin = ["tldr"]
-}
+
+[package.structure]
+bin = ["tldr"]
