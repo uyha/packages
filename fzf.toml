@@ -16,6 +16,7 @@ output = [
   '*/shell/completion.bash',
   '*/shell/key-bindings.bash'
 ]
+remove = [ "shell", "man" ]
 
 [package.structure]
 "share/man" = ["man"]
@@ -26,5 +27,4 @@ output = [
 "share/bash-completion/completions/completion.bash" = "share/bash-completion/completions/fzf.bash"
 "share/bash-binding/bindings/key-bindings.bash" = "share/bash-binding/bindings/fzf.bash"
 
-remove = [ "shell", "man" ]
 

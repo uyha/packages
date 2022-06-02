@@ -57,7 +57,7 @@ require-type() {
   actual_type="$(dasel --file "$1" --selector "$2.[@]")"
 
   if [[ "$actual_type" != "$expected_type" ]]; then
-    echo -e "${blue}$2${reset} is expected to be ${blue}$expected_type${reset}, but ${blue}$actual_type${reset} is given" >&2
+    echo -e "${clear}${blue}$2${reset} is expected to be ${blue}$expected_type${reset}, but ${blue}$actual_type${reset} is given" >&2
     exit 1
   fi
 }
@@ -361,7 +361,7 @@ finalize() {
 
 blue="\e[34m"
 reset="\e[0m"
-clear="\033[0K\r"
+clear="\r\033[0K"
 
 if [[ "$#" -lt 1 ]]; then
   echo >&2 "Expecting the name of package"
