@@ -110,7 +110,7 @@ config-check() {
   fi
 
   if check-existing "$config" "$selector.output"; then
-    if [[ "$type" == zip || "$type" == plain ]]; then
+    if [[ "$type" == gzip || "$type" == plain ]]; then
       require-type "$config" "$selector.output" string
     else
       require-array-type-all "$config" "$selector.output" string
