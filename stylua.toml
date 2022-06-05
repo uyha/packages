@@ -1,0 +1,8 @@
+[[package]]
+url = "https://github.com/JohnnyMorganz/StyLua/releases/download/v0.13.1/stylua-linux.zip"
+type = "zip"
+output = [
+  "stylua"
+]
+
+structure = { bin = ["stylua"] }
