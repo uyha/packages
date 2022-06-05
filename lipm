@@ -7,28 +7,28 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # Dasel value extractors
 value() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
   dasel --file "$1" --selector "$2"
 }
 keys() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
   dasel --multiple --file "$1" --selector "$2.-"
 }
 values() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
   dasel --multiple --file "$1" --selector "$2.[*]"
 }
 length() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
   dasel --length --file "$1" --selector "$2"
@@ -37,7 +37,7 @@ length() {
 # Dasel checkings
 check-existing() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
   dasel --file "$1" --selector "$2" &>/dev/null
@@ -46,7 +46,7 @@ check-existing() {
 # Dasel requirements
 require-type() {
   if [[ "$#" -lt 3 ]]; then
-    echo >&2 "Expecting 3 arguments: config path, selector, and expected type"
+    printf >&2 "\nExpecting 3 arguments: config path, selector, and expected type\n"
     exit 1
   fi
   require-existing "$1" "$2"
@@ -63,7 +63,7 @@ require-type() {
 }
 require-array-type-all() {
   if [[ "$#" -lt 3 ]]; then
-    echo >&2 "Expecting 3 arguments: config path, selector, and expected type"
+    printf >&2 "\nExpecting 3 arguments: config path, selector, and expected type\n"
     exit 1
   fi
 
@@ -80,18 +80,18 @@ require-array-type-all() {
 }
 require-existing() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
   if ! check-existing "$1" "$2"; then
-    echo >&2 "$2 is required"
+    printf >&2 "\n%s is required\n" "$2"
     exit 1
   fi
 }
 
 config-check() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
 
@@ -138,7 +138,7 @@ config-check() {
 
 downtract-gzip() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
 
@@ -156,7 +156,7 @@ downtract-gzip() {
 }
 downtract-tarball() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
 
@@ -189,7 +189,7 @@ downtract-tarball() {
 }
 downtract-zip() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
 
@@ -215,7 +215,7 @@ downtract-zip() {
 }
 downtract-plain() {
   if [[ "$#" -lt 2 ]]; then
-    echo >&2 "Expecting 2 arguments: config path, and selector"
+    printf >&2 "\nExpecting 2 arguments: config path, and selector\n"
     exit 1
   fi
 
@@ -241,7 +241,7 @@ trim() {
 }
 populate() (
   if [[ "$#" -lt 2 ]]; then
-    echo -e "Expecting 2 arguments: config path, and work directory"
+    printf >&2 "\nExpecting 2 arguments: config path, and work directory\n"
     exit 1
   fi
 
@@ -274,7 +274,8 @@ populate() (
       lzma) comp_type=lzma ;;
       lzop) comp_type=lzop ;;
       *)
-        echo "${blue}$type${rest} is not supported"
+        # shellcheck disable=SC2059
+        printf >&2 "\n${blue}$type${rest} is not supported\n"
         exit 1
         ;;
       esac
@@ -282,7 +283,8 @@ populate() (
     elif [[ "$type" == plain ]]; then
       downtract-plain "$config" "package.[$i]"
     else
-      echo -e "${blue}$type${reset} is not supported"
+      # shellcheck disable=SC2059
+      printf >&2 "\n${blue}$type${reset} is not supported\n"
       exit 1
     fi
 
@@ -324,25 +326,28 @@ populate() (
 )
 check-file-readable() {
   if [[ "$#" -lt 1 ]]; then
-    echo -e "Expecting 1 arguments: file path"
+    printf >&2 "\nExpecting 1 arguments: file path\n"
     exit 1
   fi
 
   declare file="$1"
   if [[ ! -e "$file" ]]; then
-    echo -e "${blue}$file${reset} does not exist" >&2
+    # shellcheck disable=SC2059
+    printf >&2 "\n${blue}$file${reset} does not exist\n" >&2
     exit 1
   elif [[ ! -f "$file" ]]; then
-    echo -e "${blue}$file${reset} is not a file" >&2
+    # shellcheck disable=SC2059
+    printf >&2 "\n${blue}$file${reset} is not a file\n" >&2
     exit 1
   elif [[ ! -r "$file" ]]; then
-    echo -e "${blue}$file${reset} is unreadable" >&2
+    # shellcheck disable=SC2059
+    printf >&2 "\n${blue}$file${reset} is unreadable\n" >&2
     exit 1
   fi
 }
 finalize() {
   if [[ "$#" -lt 2 ]]; then
-    echo -e "Expecting 2 arguments: working directory, and name"
+    printf >&2 "\nExpecting 2 arguments: working directory, and name\n"
     exit 1
   fi
 
@@ -364,7 +369,7 @@ reset="\e[0m"
 clear="\r\033[0K"
 
 if [[ "$#" -lt 1 ]]; then
-  echo >&2 "Expecting the name of package"
+  printf >&2 "\nExpecting the name of package\n"
   exit 1
 fi
 
