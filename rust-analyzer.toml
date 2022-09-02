@@ -1,0 +1,7 @@
+[[package]]
+url = "https://github.com/rust-lang/rust-analyzer/releases/download/2022-08-29/rust-analyzer-x86_64-unknown-linux-gnu.gz"
+type="gzip"
+output="rust-analyzer"
+
+[package.structure]
+bin=["rust-analyzer"]
