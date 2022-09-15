@@ -3,7 +3,11 @@
 set -euo pipefail
 
 src_dir="${src_dir:-$(mktemp -d)}"
-install_dir="${install_dir:-/opt/$name}"
+#shellcheck disable=SC2016
+if [[ -z ${name:-} ]]; then
+  echo "name must be set" >&2
+fi
+prefix="${PREFIX:-/opt}"
 dep=("${dep[@]}")
 
 package-install-dependencies() {
@@ -23,7 +27,7 @@ package-change-directory() {
 }
 
 package-configure() {
-  ./configure --prefix="$install_dir"
+  ./configure --prefix="$prefix/$name"
 }
 
 package-build() {
@@ -31,11 +35,11 @@ package-build() {
 }
 
 package-clean-links() {
-  if [[ ! -d "$install_dir" ]]; then
+  if [[ ! -d "$prefix/$name" ]]; then
     return
   fi
-  stow --delete --dir="$install_dir" --target=/usr/local .
-  rm -rf "$install_dir"
+  stow --delete --dir="$prefix" --target=/usr/local "$name"
+  rm -rf "${prefix:?}/$name"
 }
 
 package-install() {
@@ -43,7 +47,7 @@ package-install() {
 }
 
 package-install-links() {
-  stow --dir="$install_dir" --target=/usr/local .
+  stow --dir="$prefix" --target=/usr/local "$name"
 }
 
 package-restore-directory() {
