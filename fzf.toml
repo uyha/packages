@@ -1,12 +1,12 @@
 [[package]]
-url = "https://github.com/junegunn/fzf/releases/download/0.30.0/fzf-0.30.0-linux_amd64.tar.gz"
+url = "https://github.com/junegunn/fzf/releases/download/0.33.0/fzf-0.33.0-linux_amd64.tar.gz"
 type = "tar.gz"
 
 [package.structure]
 bin = [ "fzf" ]
 
 [[package]]
-url = "https://github.com/junegunn/fzf/archive/refs/tags/0.30.0.tar.gz"
+url = "https://github.com/junegunn/fzf/archive/refs/tags/0.33.0.tar.gz"
 type = "tar.gz"
 strip-components = 1
 output = [
@@ -14,17 +14,20 @@ output = [
   '*/man/man1/fzf-tmux.1',
   '*/man/man1/fzf.1',
   '*/shell/completion.bash',
-  '*/shell/key-bindings.bash'
+  '*/shell/key-bindings.bash',
+  '*/shell/key-bindings.fish'
 ]
 remove = [ "shell", "man" ]
 
 [package.structure]
 "share/man" = ["man"]
 "share/bash-completion/completions" = [ "shell/completion.bash" ]
-"share/bash-binding/bindings" = [ "shell/key-bindings.bash" ]
+"share/bash-bindings" = [ "shell/key-bindings.bash" ]
+"share/fish-bindings" = [ "shell/key-bindings.fish" ]
 
 [package.rename]
 "share/bash-completion/completions/completion.bash" = "share/bash-completion/completions/fzf.bash"
-"share/bash-binding/bindings/key-bindings.bash" = "share/bash-binding/bindings/fzf.bash"
+"share/bash-bindings/key-bindings.bash" = "share/bash-binding/fzf.bash"
+"share/fish-bindings/key-bindings.fish" = "share/fish-binding/fzf.fish"
 
 
