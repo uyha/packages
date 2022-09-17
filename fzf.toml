@@ -27,7 +27,7 @@ remove = [ "shell", "man" ]
 
 [package.rename]
 "share/bash-completion/completions/completion.bash" = "share/bash-completion/completions/fzf.bash"
-"share/bash-bindings/key-bindings.bash" = "share/bash-binding/fzf.bash"
-"share/fish-bindings/key-bindings.fish" = "share/fish-binding/fzf.fish"
+"share/bash-bindings/key-bindings.bash" = "share/bash-bindings/fzf.bash"
+"share/fish-bindings/key-bindings.fish" = "share/fish-bindings/fzf.fish"
 
 
